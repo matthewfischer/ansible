@@ -1,0 +1,11 @@
+---
+- include: ../../playbooks/puppet-disable.yaml
+- include: ../../playbooks/puppet-wait-finish.yaml
+- include: ../../playbooks/puppet-shutdown.yaml
+- include: ../../playbooks/puppet-enable.yaml
+- include: playbooks/control-prep.yaml
+- include: playbooks/control-prep_other_nodes.yaml
+- include: playbooks/control-upgrade_other_nodes.yaml
+- include: playbooks/control-prep_node1.yaml
+- include: playbooks/control-upgrade_node1.yaml
+- include: playbooks/control-disable_readonly.yaml

@@ -1,0 +1,13 @@
+---
+- name: "Prep for upgrade"
+  hosts: control
+  max_fail_percentage: 0
+  tasks:
+    - name: "Check cluster health"
+      command: /usr/local/bin/clustercheck
+
+    - name: "Add Percona blobmirror repos"
+      apt_repository: repo='deb [arch=amd64] http://bfd01-blobmirror-001.os.cloud.twc.net/mirrors/{{ blob_version }}/repo.percona.com/apt/ trusty main'
+
+    - name: "Update APT cache"
+      apt: update_cache=yes

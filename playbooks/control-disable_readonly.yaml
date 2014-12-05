@@ -1,0 +1,16 @@
+---
+# check with mysql -u root -e "show variables like 'read_o%'"
+- name: "Disable read_only mode on other nodes"
+  serial: 1
+  hosts: control
+  tasks:
+    - command: "mysql -u root -e 'SET GLOBAL read_only=OFF;'"
+      when: facter_cirrus_instance_number != 1
+
+    - command: "mysql -u root -e \"show variables like 'read_only'\""
+      when: facter_cirrus_instance_number != 1
+      register: result
+      failed_when: result.stdout.find('read_only\tOFF') == -1
+
+    - name: "Check galera health of whole cluster"
+      command: /usr/local/bin/clustercheck

@@ -1,0 +1,13 @@
+---
+- name: "Prep for upgrade on other nodes"
+  hosts: control
+  serial: 1
+  max_fail_percentage: 0
+  tasks:
+    - name: "Shutdown mysql"
+      service: "name=mysql state=stopped"
+      when: facter_cirrus_instance_number != 1
+
+    - name: "Backup MySQL database"
+      command: "tar acvf /root/control-upgrade.tar.gz /var/lib/mysql"
+      when: facter_cirrus_instance_number != 1

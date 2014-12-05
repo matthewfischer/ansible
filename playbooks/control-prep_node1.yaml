@@ -1,0 +1,15 @@
+---
+- name: "Prep for upgrade on node 1"
+  hosts: control
+  tasks:
+    - name: "Check cluster health on other nodes"
+      command: /usr/local/bin/clustercheck
+      register: result
+      until: result.rc == 0
+      environment:
+        AVAILABLE_WHEN_READONLY: 1
+      when: facter_cirrus_instance_number != 1
+
+    - name: "Shutdown mysql"
+      service: "name=mysql state=stopped"
+      when: facter_cirrus_instance_number == 1

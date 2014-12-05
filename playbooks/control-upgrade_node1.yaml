@@ -1,0 +1,44 @@
+---
+- name: "Upgrade mysql on node 1"
+  hosts: control
+  max_fail_percentage: 0
+  tasks:
+    - name: "Remove old packages"
+      apt: "name={{ item }} state=absent"
+      with_items:
+        - percona-xtradb-cluster-server-5.5
+        - percona-xtradb-cluster-common-5.5
+        - percona-xtradb-cluster-client-5.5
+        - percona-xtradb-cluster-galera-3.x
+      when: facter_cirrus_instance_number == 1
+
+    - name: "Install new packages"
+      apt: "name=percona-xtradb-cluster-56 state=present"
+      when: facter_cirrus_instance_number == 1
+
+    - name: "ensure mysql is running"
+      command: "mysql -u root -e \"show variables\""
+      when: facter_cirrus_instance_number == 1
+      retries: 10
+      delay: 10
+
+    # ensure cluster is ready before running mysql_upgrade
+    - name: "Check galera health on node 1"
+      command: /usr/local/bin/clustercheck
+      when: facter_cirrus_instance_number == 1
+      register: result
+      until: result.rc == 0
+      retries: 10
+      delay: 10
+
+    - name: "Run mysql_upgrade"
+      command: "mysql_upgrade"
+      when: facter_cirrus_instance_number == 1
+
+    - name: "Check galera health on node 1"
+      command: /usr/local/bin/clustercheck
+      register: result
+      until: result.rc == 0
+      when: facter_cirrus_instance_number == 1
+      retries: 10
+      delay: 10
