@@ -1,0 +1,19 @@
+---
+- name: "Start Galera and Keystone on all Keystone nodes"
+  hosts: keystone
+  gather_facts: no
+  serial: 1
+  tasks:
+    - name: "Start Galera"
+      service: "name=mysql state=started"
+
+    - name: "Waiting up to 15 minutes for good galera health"
+      action: command /usr/local/bin/clustercheck
+      register: result
+      until: result.rc == 0
+      retries: 90
+      delay: 10
+      changed_when: False
+
+    - name: "Start Keystone"
+      service: "name=keystone state=started"

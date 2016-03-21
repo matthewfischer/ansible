@@ -1,0 +1,30 @@
+---
+- name: "Shutdown Keystone in site2"
+  hosts: site2-keystone
+  gather_facts: no
+  tasks:
+    - service: "name=keystone state=stopped"
+
+- name: "Shutdown Galera on first keystone node in site2"
+  hosts: site2-keystone
+  tasks:
+    - service: "name=mysql state=stopped"
+      when: facter_cirrus_instance_number == 1
+
+- name: "Backup MySQL database on first keystone node in site2"
+  hosts: site2-keystone
+  tasks:
+    - command: "tar acvf /root/keystone-upgrade.tar.gz /var/lib/mysql"
+      when: facter_cirrus_instance_number == 1
+
+- name: "Start Galera on first keystone node in site2"
+  hosts: site2-keystone
+  tasks:
+    - service: "name=mysql state=started"
+      when: facter_cirrus_instance_number == 1
+
+- name: "Shutdown Keystone in in site1 (except first node)"
+  hosts: site1-keystone
+  tasks:
+    - service: "name=keystone state=stopped"
+      when: facter_cirrus_instance_number != 1

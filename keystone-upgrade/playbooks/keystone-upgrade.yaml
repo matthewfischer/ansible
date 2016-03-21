@@ -1,0 +1,28 @@
+---
+- name: "Prepare to run puppet on nodes"
+  hosts: 127.0.0.1
+  connection: local
+  sudo: false
+  tasks:
+  - name: "Create ansible log directory"
+    file: "path={{ log_dir | default('/var/log/ansible') }} state=directory"
+
+  - name: "Get timestamp for run"
+    command: date --iso-8601=seconds
+    register: timestamp_result
+
+  - name: "Record timestamp in properties file"
+    shell: 'echo "LATEST_TIMESTAMP: {{ timestamp_result.stdout }}"
+            > {{ timestamp_file }}'
+    when: timestamp_file is defined
+
+- name: "Run puppet on on the first keystone node in site1"
+  hosts: site1-keystone
+  serial: 1
+  tasks:
+    - include: ../../../tasks/puppet-run.yaml
+      vars:
+        timestamp: "{{ hostvars['127.0.0.1'].timestamp_result.stdout }}"
+        galera_check: true
+      when: facter_cirrus_instance_number == 1
+

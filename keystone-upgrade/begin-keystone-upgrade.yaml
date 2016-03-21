@@ -1,0 +1,9 @@
+---
+- include: ../../playbooks/puppet-disable.yaml
+- include: ../../playbooks/puppet-wait-finish.yaml
+- include: ../../playbooks/puppet-shutdown.yaml
+- include: ../../playbooks/puppet-enable.yaml
+- include: ../../deploy.puppet-checkout.yaml
+- include: playbooks/keystone-prep.yaml
+- include: playbooks/keystone-upgrade.yaml
+- include: ../restart-services/restart-control-services.yaml
